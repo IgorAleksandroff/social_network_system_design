@@ -1,0 +1,345 @@
+openapi: 3.0.0
+info:
+  title: Social Network API
+  description: REST API for Social Network
+  version: 1.0.0
+servers:
+  - url: https://api.sn.com
+paths:
+  /friends:
+    post:
+      summary: Add a friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: integer
+                friendIDs:
+                  type: array
+                  items:
+                    type: integer
+              required:
+                - userID
+                - friendIDs
+      responses:
+        '200':
+          description: Friends added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  friendIDs:
+                    type: array
+                    items:
+                      type: integer
+    put:
+      summary: Remove a friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: integer
+                friendIDs:
+                  type: array
+                  items:
+                    type: integer
+              required:
+                - userID
+                - friendIDs
+      responses:
+        '200':
+          description: Friends removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  friendIDs:
+                    type: array
+                    items:
+                      type: integer
+  /friends/{user_id}:
+    get:
+      summary: Get user's friends
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of user's friends
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    userID:
+                      type: integer
+                    name:
+                      type: string
+                    age:
+                      type: integer
+                    # ...
+
+  /profile/{user_id}:
+    get:
+      summary: Get user profile
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User profile information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userID:
+                    type: integer
+                  name:
+                    type: string
+                  age:
+                    type: integer
+                  # ...
+
+  /posts:
+    post:
+      summary: Create a posts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userID:
+                  type: integer
+                posts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                      media:
+                        type: array
+                        items:
+                          type: string
+              required:
+                - userID
+                - posts
+      responses:
+        '200':
+          description: Posts created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  postIDs:
+                    type: array
+                    items:
+                      type: integer
+
+  /posts/{post_id}/media:
+    post:
+      summary: Upload media file
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Media file uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  media_id:
+                    type: string
+                  file_name:
+                    type: string
+
+  /feed/{user_id}/{type}:
+    get:
+      summary: Get user or home feed
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+        - name: type
+          in: path
+          description: Type of feed (home or user)
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Feed posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        postID:
+                          type: integer
+                        text:
+                          type: string
+                        media:
+                          type: array
+                          items:
+                            type: string
+
+  /chats/{user_id}:
+    get:
+      summary: Get user chats and dialogs
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User chats and dialogs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chats:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        chatID:
+                          type: integer
+                        participantIDs:
+                          type: array
+                          items:
+                            type: integer
+                        countUnreadMsg:
+                          type: integer
+                        lastMsg:
+                          type: string
+                        # ...
+
+  /messages:
+    post:
+      summary: Send the messages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                messages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      from:
+                        description: User ID
+                        type: integer
+                      to:
+                        description: Chat ID
+                        type: integer
+                      createdAt:
+                        type: integer
+                      idempotencyKey:
+                        type: string
+                      text:
+                        type: string
+      responses:
+        '200':
+          description: Messages sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messageIDs:
+                    type: array
+                    items:
+                      type: integer
+
+  /messages/{chat_id}/{user_id}/{after_msg_id}:
+    get:
+      summary: Get messages in a dialog or chat for user
+      parameters:
+        - name: chat_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: after_msg_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        from:
+                          description: User ID
+                          type: integer
+                        to:
+                          description: Chat ID
+                          type: integer
+                        createdAt:
+                          type: integer
+                        unread:
+                          type: boolean
+                        text:
+                          type: string
+
+
